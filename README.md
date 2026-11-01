@@ -522,10 +522,6 @@ NexaGraph is a portfolio and research system, not a production platform.
 - Expand MCP tool coverage and n8n automation.
 - Add Docker-based deployment, monitoring and observability.
 
----
-
-
-GitHub: [@anuja2024](https://github.com/anuja2024)
 
 ---
 
