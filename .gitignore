@@ -1,0 +1,58 @@
+﻿# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Frontend dependencies and builds
+node_modules/
+dist/
+build/
+
+# Local databases and vector stores
+*.db
+*.sqlite
+*.sqlite3
+qdrant_storage/
+neo4j_data/
+postgres_data/
+
+# Private datasets and generated data
+data/
+*.pdf
+*.docx
+*.xlsx
+*.csv
+*.jsonl
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
+backups/
+
+# IDE and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Historical source backups
+*_pre_*.py
+*_before_*.py
+*.before_*.bak
+*_backup*.py
+
+# Internal inspection reports
+backend_inspection.txt
+review_backend_modules.txt
+
+/frontend/README.md

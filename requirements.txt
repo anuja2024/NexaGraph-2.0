@@ -1,0 +1,15 @@
+﻿fastapi==0.162.0
+uvicorn==0.54.0
+google-genai==2.34.0
+python-dotenv==1.2.4
+psycopg[binary]==3.3.6
+qdrant-client[fastembed]==1.20.0
+rank-bm25==0.2.2
+fastembed==0.9.1
+onnxruntime==1.31.0
+neo4j
+mcp
+
+# Authentication and password hashing
+PyJWT==2.15.1
+pwdlib[argon2]==0.3.1
