@@ -29,6 +29,7 @@
 - [System Architecture](#system-architecture)
 - [Retrieval Pipeline](#retrieval-pipeline)
 - [Request Lifecycle](#request-lifecycle)
+- [Employee and Manager Roles](#employee-and-manager-roles)
 - [Document Ingestion](#document-ingestion)
 - [Evaluation](#evaluation)
 - [Security and Governance](#security-and-governance)
@@ -93,7 +94,9 @@ In a company setting, answers also have to be **traceable and access-controlled*
 | Candidate reranking | Cross-encoder |
 | Answer generation | Local Qwen 2.5 through Ollama |
 | Citation integrity | Source identifier and metadata validation |
+| Abstention | Declines to answer when the retrieved evidence is insufficient |
 | Authentication | JWT employee authentication, Argon2 password hashing |
+| Role-based access | Employee and Manager roles |
 | Access management | Project-level and document-level permissions |
 | Observability | Application audit logging in PostgreSQL |
 | Human oversight | Document review and approval workflows |
@@ -178,7 +181,7 @@ Here $R$ is the set of retrievers and $k$ is a smoothing constant.
 
 **5. Cross-encoder reranking.** A cross-encoder reads the query and a candidate passage together and scores their relevance, which is more precise than comparing separate embeddings. It runs on the fused candidate pool only. In Benchmark v3 it did not improve aggregate results, see [Evaluation](#evaluation).
 
-**6. Grounded generation.** The selected evidence goes to a local Qwen model through Ollama, which is instructed to answer from the supplied evidence and cite source identifiers.
+**6. Grounded generation.** The selected evidence goes to a local Qwen model through Ollama, which is instructed to answer only from the supplied evidence, cite source identifiers, and abstain when the evidence is insufficient.
 
 **7. Citation validation.** Cited identifiers and their metadata are checked against the evidence that was actually supplied, so fabricated or malformed citations are caught before an answer is returned.
 
@@ -280,6 +283,45 @@ This is a preliminary assessment, not independent human verification and not an 
 
 ---
 
+## Employee and Manager Roles
+
+NexaGraph has two application roles. Both sign in through the same JWT authentication, and what each can do depends on the assigned role plus project and document permissions.
+
+```mermaid
+flowchart TB
+    L["Login"] --> J["JWT Authentication"]
+    J --> RV["Role Validation"]
+    RV --> E["Employee"]
+    RV --> M["Manager"]
+    E --> KS["Knowledge Search<br/>+ Grounded Answers"]
+    M --> KS
+    M --> RQ["Manager Review Queue"]
+    RQ --> AP["Approve"]
+    RQ --> RJ["Reject"]
+    KS --> AU["Audit Logging"]
+    AP --> AU
+    RJ --> AU
+```
+
+| Capability | Employee | Manager |
+|---|:---:|:---:|
+| Sign in with employee credentials | Yes | Yes |
+| Access authorized projects | Yes | Yes |
+| Hybrid knowledge search | Yes | Yes |
+| Grounded answers with citations | Yes | Yes |
+| View authorized documents | Yes | Yes |
+| Access the manager review queue | No | Yes |
+| Approve or reject review requests | No | Yes |
+| Manager-oriented audit activity | No | Yes |
+
+**Employee workflow:** sign in, open an authorized project, ask a question, then review the answer with its citations and supporting evidence.
+
+**Manager workflow:** sign in, open the review queue, evaluate a pending request, then approve or reject it. The action is recorded through audit logging.
+
+Individual project and document access still depends on permission checks. The table describes the intended role distinction and does not imply unrestricted access to enterprise resources.
+
+---
+
 ## Security and Governance
 
 **Authentication** ([`app/auth/`](app/auth/))
@@ -289,6 +331,7 @@ This is a preliminary assessment, not independent human verification and not an 
 - Active-account checks
 
 **Access control** ([`app/access_control.py`](app/access_control.py))
+- Role-aware workflows (Employee and Manager)
 - Project-level access management
 - Document-level permissions
 - Authenticated API access
@@ -481,9 +524,6 @@ NexaGraph is a portfolio and research system, not a production platform.
 
 ---
 
-## Author
-
-**Anuja Patade**, M.Sc. Data Science, TU Dortmund University
 
 GitHub: [@anuja2024](https://github.com/anuja2024)
 
